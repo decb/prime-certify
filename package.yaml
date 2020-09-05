@@ -1,0 +1,22 @@
+name: prime-cert
+license: BSD3
+
+extra-source-files:
+  - README.md
+
+dependencies:
+  - base >= 4.7 && < 5
+
+ghc-options:
+  - -O0
+  - -Wall
+  - -Wcompat
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wredundant-constraints
+  - -Wno-unused-matches
+  - -Wno-name-shadowing
+  - -Wno-type-defaults
+
+library:
+  source-dirs: src

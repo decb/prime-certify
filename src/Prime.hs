@@ -4,10 +4,14 @@ module Prime
   , Prove
   , axiom
   , extractPrime
+  , generate
   , rule1
   , rule2
   , unPrime
   ) where
+
+import Control.Monad (foldM)
+import Data.List (find)
 
 newtype Prime =
   Prime Integer
@@ -55,3 +59,33 @@ modExp x y m = go x y 1
 
 divides :: Integer -> Integer -> Bool
 divides n m = m `mod` n == 0
+
+generate :: Integer -> Prove Proof
+generate 2 = do
+  a <- axiom 2 1
+  rule2 a
+generate n =
+  let ps = primeFactors (n - 1)
+      witness =
+        find
+          (\m ->
+             modExp m (n - 1) n == 1 &&
+             all (\p -> modExp m ((n - 1) `div` p) n /= 1) ps)
+          [2 .. n - 1]
+  in case witness of
+       Just w -> do
+         a <- axiom n w
+         sub <- mapM generate ps
+         r <- foldM rule1 a sub
+         rule2 r
+       Nothing -> Left $ "Can't find witness for " <> show n
+
+primeFactors :: Integer -> [Integer]
+primeFactors = go 2
+  where
+    go d n
+      | d * d > n = [n]
+      | otherwise =
+        case n `divMod` d of
+          (n', 0) -> d : go d n'
+          _ -> go (d + 1) n

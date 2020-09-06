@@ -3,6 +3,7 @@ module Prime
   , Proof
   , Prove
   , axiom
+  , back
   , extractPrime
   , generate
   , rule1
@@ -21,15 +22,33 @@ newtype Prime =
   Prime Integer
   deriving (Show)
 
-data Proof
-  = Triple (Integer, Integer, Integer)
+data Derivation a
+  = Axiom Integer
+          Integer
+  | Rule1 a
+          a
+  | Rule2 a
+  deriving (Show)
+
+data ProofValue
+  = Triple Integer
+           Integer
+           Integer
   | Single Integer
+  deriving (Show)
+
+data Proof =
+  Proof ProofValue
+        (Derivation Proof)
   deriving (Show)
 
 type Prove = Either String
 
+back :: Proof -> Derivation Proof
+back (Proof _ d) = d
+
 extractPrime :: Proof -> Maybe Prime
-extractPrime (Single p) = return $ Prime p
+extractPrime (Proof (Single p) _) = return $ Prime p
 extractPrime _ = Nothing
 
 unPrime :: Prime -> Integer
@@ -37,19 +56,19 @@ unPrime (Prime n) = n
 
 axiom :: Integer -> Integer -> Prove Proof
 axiom x y
-  | x >= 1 && y >= 1 = return $ Triple (x, y, 1)
-  | otherwise = Left "Can't apply axiom"
+  | x >= 1 && y >= 1 = return $ Proof (Triple x y 1) (Axiom x y)
+  | otherwise = throwError "Can't apply axiom"
 
 rule1 :: Proof -> Proof -> Prove Proof
-rule1 (Triple (p, x, a)) (Single q)
+rule1 b1@(Proof (Triple p x a) _) b2@(Proof (Single q) _)
   | modExp x ((p - 1) `div` q) p /= 1 && q `divides` (p - 1) =
-    return $ Triple (p, x, q * a)
-rule1 _ _ = Left "Can't apply rule1"
+    return $ Proof (Triple p x (q * a)) (Rule1 b1 b2)
+rule1 _ _ = throwError "Can't apply rule1"
 
 rule2 :: Proof -> Prove Proof
-rule2 (Triple (p, x, p'))
-  | p' == p - 1 && modExp x p' p == 1 = return $ Single p
-rule2 _ = Left "Can't apply rule2"
+rule2 b@(Proof (Triple p x p') _)
+  | p' == p - 1 && modExp x p' p == 1 = return $ Proof (Single p) (Rule2 b)
+rule2 _ = throwError "Can't apply rule2"
 
 modExp :: Integer -> Integer -> Integer -> Integer
 modExp x y m = go x y 1
@@ -57,7 +76,7 @@ modExp x y m = go x y 1
     go x 0 r = r
     go x y r =
       let x' = mod (x * x) m
-      in case y `divMod` 2 of
+      in case y `quotRem` 2 of
            (y', 1) -> go x' y' (r * x `mod` m)
            (y', _) -> go x' y' r
 

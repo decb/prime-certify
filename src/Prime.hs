@@ -34,11 +34,24 @@ axiom x y
 
 rule1 :: Proof -> Proof -> Prove Proof
 rule1 (Triple (p, x, a)) (Single q)
-  | ((x ^ ((p - 1) `div` q)) `mod` p) /= 1 && (p - 1) `mod` q == 0 =
+  | modExp x ((p - 1) `div` q) p /= 1 && q `divides` (p - 1) =
     return $ Triple (p, x, q * a)
 rule1 _ _ = Left "Can't apply rule1"
 
 rule2 :: Proof -> Prove Proof
 rule2 (Triple (p, x, p'))
-  | p' == p - 1 && ((x ^ p') `mod` p) == 1 = return $ Single p
+  | p' == p - 1 && modExp x p' p == 1 = return $ Single p
 rule2 _ = Left "Can't apply rule2"
+
+modExp :: Integer -> Integer -> Integer -> Integer
+modExp x y m = go x y 1
+  where
+    go x 0 r = r
+    go x y r =
+      let x' = mod (x * x) m
+      in case y `divMod` 2 of
+           (y', 1) -> go x' y' (r * x `mod` m)
+           (y', _) -> go x' y' r
+
+divides :: Integer -> Integer -> Bool
+divides n m = m `mod` n == 0

@@ -13,5 +13,5 @@ For examples, see [`Examples.hs`](src/Examples.hs).
 
 ## References
 
-- [0] &mdash; Vaughn Pratt, [*Every Prime has a Succint Certificate*](http://boole.stanford.edu/pub/SucCert.pdf)
-- [1] &mdash; Wikipedia, [*Primality certificate*](https://en.wikipedia.org/wiki/Primality_certificate)
+1. Vaughn Pratt, [*Every Prime has a Succint Certificate*](http://boole.stanford.edu/pub/SucCert.pdf)
+2. Wikipedia, [*Primality certificate*](https://en.wikipedia.org/wiki/Primality_certificate)

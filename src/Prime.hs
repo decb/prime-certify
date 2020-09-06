@@ -11,7 +11,11 @@ module Prime
   ) where
 
 import Control.Monad (foldM)
+import Control.Monad.Except (throwError)
+import Control.Monad.State.Strict (StateT, evalStateT, get, modify)
 import Data.List (find)
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 
 newtype Prime =
   Prime Integer
@@ -22,7 +26,7 @@ data Proof
   | Single Integer
   deriving (Show)
 
-type Prove a = Either String a
+type Prove = Either String
 
 extractPrime :: Proof -> Maybe Prime
 extractPrime (Single p) = return $ Prime p
@@ -61,24 +65,37 @@ divides :: Integer -> Integer -> Bool
 divides n m = m `mod` n == 0
 
 generate :: Integer -> Prove Proof
-generate 2 = do
-  a <- axiom 2 1
-  rule2 a
 generate n =
-  let ps = primeFactors (n - 1)
-      witness =
-        find
-          (\m ->
-             modExp m (n - 1) n == 1 &&
-             all (\p -> modExp m ((n - 1) `div` p) n /= 1) ps)
-          [2 .. n - 1]
-  in case witness of
-       Just w -> do
-         a <- axiom n w
-         sub <- mapM generate ps
-         r <- foldM rule1 a sub
-         rule2 r
-       Nothing -> Left $ "Can't find witness for " <> show n
+  case axiom 2 1 >>= rule2 of
+    Right p2 -> evalStateT (generate' n) (Map.singleton 2 p2)
+    Left err -> throwError err
+
+generate' :: Integer -> StateT (Map Integer Proof) Prove Proof
+generate' n = do
+  map <- get
+  case Map.lookup n map of
+    Just proof -> return proof
+    Nothing ->
+      let ps = primeFactors (n - 1)
+          witness =
+            find
+              (\m ->
+                 modExp m (n - 1) n == 1 &&
+                 all (\p -> modExp m ((n - 1) `div` p) n /= 1) ps)
+              [2 .. n - 1]
+      in case witness of
+           Just w -> do
+             sub <- mapM generate' ps
+             let result = do
+                   a <- axiom n w
+                   r <- foldM rule1 a sub
+                   rule2 r
+             case result of
+               Right proof -> do
+                 modify (Map.insert n proof)
+                 return proof
+               Left err -> throwError err
+           Nothing -> throwError ("Can't find witness for " <> show n)
 
 primeFactors :: Integer -> [Integer]
 primeFactors = go 2

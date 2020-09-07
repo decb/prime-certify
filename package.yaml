@@ -1,8 +1,5 @@
 name: prime-certify
-license: BSD3
-
-extra-source-files:
-  - README.md
+license: MIT
 
 dependencies:
   - base >= 4.7 && < 5

@@ -1,4 +1,4 @@
-name: prime-cert
+name: prime-certify
 license: BSD3
 
 extra-source-files:
@@ -24,11 +24,11 @@ library:
   source-dirs: src
 
 executables:
-  prime-cert:
+  prime-certify:
     main: Main.hs
     source-dirs: app
     ghc-options:
       - -threaded
       - -rtsopts
     dependencies:
-      - prime-cert
+      - prime-certify

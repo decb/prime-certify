@@ -1,4 +1,4 @@
-# prime-cert
+# prime-certify
 
 [Pratt primality certificates](http://boole.stanford.edu/pub/SucCert.pdf)
 in Haskell, implemented as an [LCF](https://en.wikipedia.org/wiki/Logic_for_Computable_Functions)-style proof system.

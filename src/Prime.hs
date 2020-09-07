@@ -1,6 +1,8 @@
 module Prime
-  ( Prime
+  ( Derivation(..)
+  , Prime
   , Proof
+  , ProofValue(..)
   , Prove
   , axiom
   , back
@@ -9,6 +11,7 @@ module Prime
   , rule1
   , rule2
   , unPrime
+  , value
   ) where
 
 import Control.Monad (foldM)
@@ -46,6 +49,9 @@ type Prove = Either String
 
 back :: Proof -> Derivation Proof
 back (Proof _ d) = d
+
+value :: Proof -> ProofValue
+value (Proof v _) = v
 
 extractPrime :: Proof -> Maybe Prime
 extractPrime (Proof (Single p) _) = return $ Prime p

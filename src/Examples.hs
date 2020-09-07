@@ -35,3 +35,6 @@ prime474397531 = do
   d21 <- rule1 d20 d15
   d22 <- rule1 d21 d15
   rule2 d22
+
+primeM107 :: Prove Proof
+primeM107 = generate (2 ^ 107 - 1)

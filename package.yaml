@@ -10,7 +10,7 @@ dependencies:
   - mtl
 
 ghc-options:
-  - -O0
+  - -O2
   - -Wall
   - -Wcompat
   - -Wincomplete-record-updates

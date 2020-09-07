@@ -7,6 +7,7 @@ module Prime
   , axiom
   , back
   , extractPrime
+  , primeFactors
   , generate
   , rule1
   , rule2
@@ -123,11 +124,14 @@ generate' n = do
            Nothing -> throwError ("Can't find witness for " <> show n)
 
 primeFactors :: Integer -> [Integer]
-primeFactors = go 2
+primeFactors 1 = []
+primeFactors n
+  | 2 `divides` n = 2 : primeFactors (n `div` 2)
+  | 3 `divides` n = 3 : primeFactors (n `div` 3)
+  | 5 `divides` n = 5 : primeFactors (n `div` 5)
+  | otherwise = go (cycle [4, 2, 4, 2, 4, 6, 2, 6]) 7 n
   where
-    go d n
-      | d * d > n = [n]
-      | otherwise =
-        case n `divMod` d of
-          (n', 0) -> d : go d n'
-          _ -> go (d + 1) n
+    go is d m
+      | d * d > m = [m]
+      | d `divides` m = d : go is d (m `div` d)
+      | otherwise = go (tail is) (d + head is) m
